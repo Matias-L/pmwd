@@ -6,9 +6,9 @@
 
 
 # Check if base dir exists
-DIR=~/Documents/pmwd
+DIR=~/pmwd
 if [ ! -d "$DIR" ]; then
-    mkdir ~/Documents/pmwd
+    mkdir ~/pmwd
 fi
 
 LOCKFILE=$DIR/.lock     # File used as flag to check if session is ongoing
