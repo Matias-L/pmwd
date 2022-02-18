@@ -21,26 +21,41 @@ TIMEFILE=$DIR/time.csv  # Table with sessions durations
 if [ -f "$LOCKFILE" ]; then
     # Ending session
     endMessage=$(zenity --entry --text="Terminando sesion. Algo para mencionar?")
-    echo "$(date) || $endMessage" >> $RAWFILE
+    answer=$? # 0: User pressed "Ok". 1: "cancel"
     
+    if [ $answer -eq 0 ]
+    then
+        echo "$(date) || $endMessage" >> $RAWFILE    
 
-    # Time table entry creation.
-    prevTS=$(cat $LOCKFILE)
-    newTS=$(date +%s)
-    sessionTimeDiff=$(($newTS - $prevTS)) # Saved as UNIX timestamp
+        # Time table entry creation.
+        prevTS=$(cat $LOCKFILE)
+        newTS=$(date +%s)
+        sessionTimeDiff=$(($newTS - $prevTS)) # Saved as UNIX timestamp
 
-    registeredTime="$((sessionTimeDiff /60/60)) H,$(((sessionTimeDiff/60) % 60)) M,$(($sessionTimeDiff % 60)) S"
-    echo "$endMessage, $registeredTime" >> $TIMEFILE
+        registeredTime="$((sessionTimeDiff /60/60)) H,$(((sessionTimeDiff/60) % 60)) M,$(($sessionTimeDiff % 60)) S"
+        echo "$endMessage, $registeredTime" >> $TIMEFILE
 
-    rm $LOCKFILE # Remove this file so the session is over
+        rm $LOCKFILE # Remove this file so the session is over
+        
+        notify-send -t 3000 "Finalizada sesion - $registeredTime"
+    else
+        echo "Mentirita"
+    fi
     
-    notify-send -t 3000 "Finalizada sesion"
-
     else
     # Begin session
     concept=$(zenity --entry --text="Que tarea arrancas?")
-    notify-send -t 3000 "Empezaste $concept"
-    timestamp=$(date +%s)
-    echo $timestamp > $LOCKFILE
-    echo "$(date) -- $concept" >> $RAWFILE
+    answer=$? # 0: User pressed "Ok". 1: "cancel"
+    
+    if [ $answer -eq 0 ]
+    then
+        notify-send -t 3000 "Empezaste $concept"
+        timestamp=$(date +%s)
+        echo $timestamp > $LOCKFILE
+        echo "$(date) -- $concept" >> $RAWFILE
+    else
+        echo "Mentirita"
+    fi
+
+
 fi
