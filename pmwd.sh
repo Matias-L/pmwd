@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 
 #####
 ## PMWD: PMs Wet Dream. A simple tool for tasks time tracking.
@@ -20,9 +20,11 @@ TIMEFILE=$DIR/time.csv  # Table with sessions durations
 # If true, then a session is in progress
 if [ -f "$LOCKFILE" ]; then
     # Ending session
-    endMessage=$(zenity --entry --text="Terminando sesion. Algo para mencionar?")
+    endMessageRaw=$(zenity --entry --text="Terminando sesion. Algo para mencionar?")
     answer=$? # 0: User pressed "Ok". 1: "cancel"
     
+    endMessage=${endMessageRaw//","/\.}
+    echo $endMessage
     if [ $answer -eq 0 ]
     then
         echo "$(date) || $endMessage" >> $RAWFILE    
