@@ -14,7 +14,12 @@ fi
 LOCKFILE=$DIR/.lock     # File used as flag to check if session is ongoing
 RAWFILE=$DIR/raw.log    # File to save history of sessions
 TIMEFILE=$DIR/time.csv  # Table with sessions durations
+TIMETABLE=$DIR/timeTable.csv  # New table with sessions durations
 
+# Create time table with corresponding format
+if [ ! -f "$TIMETABLE" ]; then
+    echo "Hora inicio,Descripcion inicio,Hora fin,Descripcion fin,H,M,S" >> $TIMETABLE
+fi
 
 # Check if "lock" file exist
 # If true, then a session is in progress
@@ -25,6 +30,8 @@ if [ -f "$LOCKFILE" ]; then
     
     if [ $answer -eq 0 ]
     then
+        TASKSTARTINFO="$(tail -n 1 $RAWFILE)"
+        TASKENDINFO="$(date),$endMessage"
         echo "$(date) || $endMessage" >> $RAWFILE    
 
         # Time table entry creation.
@@ -35,6 +42,7 @@ if [ -f "$LOCKFILE" ]; then
         registeredTime="$((sessionTimeDiff /60/60)) H,$(((sessionTimeDiff/60) % 60)) M,$(($sessionTimeDiff % 60)) S"
         echo "$endMessage, $registeredTime" >> $TIMEFILE
 
+        echo "$TASKSTARTINFO, $TASKENDINFO, $registeredTime" >> $TIMETABLE
         rm $LOCKFILE # Remove this file so the session is over
         
         notify-send -t 3000 "Finalizada sesion - $registeredTime"
@@ -52,7 +60,7 @@ if [ -f "$LOCKFILE" ]; then
         notify-send -t 3000 "Empezaste $concept"
         timestamp=$(date +%s)
         echo $timestamp > $LOCKFILE
-        echo "$(date) -- $concept" >> $RAWFILE
+        echo "$(date),$concept" >> $RAWFILE
     else
         echo "Mentirita"
     fi
