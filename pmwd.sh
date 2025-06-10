@@ -4,7 +4,8 @@
 ## PMWD: PMs Wet Dream. A simple tool for tasks time tracking.
 ####
 
-
+REPORTEREXE=~/Documents/pmwd-master/gui2.py
+REPORTCSV=~/pmwd/timeTable.csv
 # Check if base dir exists
 DIR=~/pmwd
 if [ ! -d "$DIR" ]; then
@@ -25,8 +26,10 @@ fi
 # If true, then a session is in progress
 if [ -f "$LOCKFILE" ]; then
     # Ending session
-    endMessage=$(zenity --entry --text="Terminando sesion. Algo para mencionar?")
+    endMessageRaw=$(zenity --entry --text="Terminando sesion. Algo para mencionar?")
     answer=$? # 0: User pressed "Ok". 1: "cancel"
+    
+    endMessage=$(echo "$endMessageRaw" | sed 's/,/./g')
     
     if [ $answer -eq 0 ]
     then
@@ -52,15 +55,22 @@ if [ -f "$LOCKFILE" ]; then
     
     else
     # Begin session
-    concept=$(zenity --entry --text="Que tarea arrancas?")
+    conceptRaw=$(zenity --entry --text="Que tarea arrancas?")
     answer=$? # 0: User pressed "Ok". 1: "cancel"
     
-    if [ $answer -eq 0 ]
+    concept=$(echo "$conceptRaw" | sed 's/,/./g')
+
+    if [ $answer -eq 0 ];
     then
-        notify-send -t 3000 "Empezaste $concept"
-        timestamp=$(date +%s)
-        echo $timestamp > $LOCKFILE
-        echo "$(date),$concept" >> $RAWFILE
+        if [ $concept = "q" ];
+        then
+            python3 $REPORTEREXE $REPORTCSV
+        else
+            notify-send -t 3000 "Empezaste $concept"
+            timestamp=$(date +%s)
+            echo $timestamp > $LOCKFILE
+            echo "$(date),$concept" >> $RAWFILE
+        fi
     else
         echo "Mentirita"
     fi
